@@ -1,0 +1,204 @@
+// les21.cpp : Этот файл содержит функцию "main". Здесь начинается и заканчивается выполнение программы.
+//
+
+#include"Header.h"
+using namespace std;
+class Reverse
+{
+public:
+    string exp;
+    string Rev_exp;
+    Stack one;
+    map <char, int> priority;
+    
+    double F(string fname, double x) {
+
+        if (fname == "abs")
+            return abs(x);
+        if (fname == "sqr")
+            return x * x;
+        if (fname == "test")
+            return 4 * x * x - 2 * x + 1;
+        //...
+
+    }
+
+
+    string Conversion()
+    {
+        priority['*'] = 3;
+        priority['/'] = 3;
+        priority['+'] = 2;
+        priority['-'] = 2;
+        priority['('] = 1;
+        for (int i = 0; i < exp.length(); i++)
+        {
+            if (exp[i] >= 48 && exp[i] <= 57)
+            {
+                
+                Rev_exp += exp[i];
+                if (i > 0)
+                {
+                    if (exp[i - 1] >= 48 && exp[i - 1] <= 57)
+                    {
+                        Rev_exp += '.';
+                    }
+                }
+            }
+            if (exp[i] == '*' || exp[i] == '/' || exp[i] == '+' || exp[i] == '-')
+            {
+                if (i == 0 && exp[i] == '-')
+                {
+                    Rev_exp += "%";
+                }
+                else if (exp[i] == '-' && exp[i - 1] == '(')
+                {
+                    Rev_exp += "%";
+                }
+                else
+                {
+                    if (priority[exp[i]] > priority[one.Back_el()[0]])
+                    {
+                        string tmp = "";
+                        tmp += exp[i];
+                        one.Push(tmp);
+                    }
+                    else if (priority[one.Back_el()[0]] >= priority[exp[i]])
+                    {
+                        while (priority[one.Back_el()[0]] >= priority[exp[i]])
+                        {
+
+                            Rev_exp += one.Pop();
+                        }
+                        string tmp = "";
+                        tmp += exp[i];
+                        one.Push(tmp);
+                    }
+                }
+                
+            }
+            if (exp[i] == '(')
+            {
+                one.Push("(");
+            }
+            if (exp[i] == ')')
+            {
+                while (one.Back_el()[0] != '(')
+                {
+                    Rev_exp += one.Pop();
+                }
+                one.Pop();
+            }
+            
+        }
+        if (!one.IsEmpty())
+        {
+
+            while (!one.IsEmpty())
+            {
+                Rev_exp += one.Pop();
+            }
+        }
+        return Rev_exp;
+    }
+    double Calculate()
+    {
+        Stack two;
+        for (int i = 0; i < Rev_exp.length(); i++)
+        {
+            if (Rev_exp[i] >= 48 && Rev_exp[i] <= 57 && Rev_exp[i + 2] != '.')
+            {
+                if (i > 0 && Rev_exp[i - 1] == '%')
+                {
+                    string x;
+                    x += '-';
+                    x += Rev_exp[i];
+                    two.Push(x);
+                }
+                else
+                {
+                    string tmp;
+                    tmp += Rev_exp[i];
+                    two.Push(tmp);
+                }
+            }
+            if (Rev_exp[i] >= 48 && Rev_exp[i] <= 57 && Rev_exp[i + 2] == '.')
+            {
+                if (i > 0 && Rev_exp[i - 1] == '%')
+                {
+                    string x;
+                    x += '-';
+                    x += Rev_exp[i];
+                    x += Rev_exp[i + 1];
+                    two.Push(x);
+                    i += 2;
+                }
+            else
+            {
+                string tmp;
+                tmp += Rev_exp[i];
+                tmp += Rev_exp[i + 1];
+                two.Push(tmp);
+                i += 2;
+            }
+                
+            }
+            if(Rev_exp[i] == '*')
+            {
+                string sec = two.Pop();
+                string fir = two.Pop();
+                double sec_i = stod(sec);
+                double fir_i = stod(fir);
+                double res = fir_i * sec_i;
+                two.Push(to_string(res));
+            }
+            if (Rev_exp[i] == '/')
+            {
+                string sec = two.Pop();
+                string fir = two.Pop();
+                double sec_i = stod(sec);
+                double fir_i = stod(fir);
+                double res = fir_i / sec_i;
+                two.Push(to_string(res));
+            }
+            if (Rev_exp[i] == '+')
+            {
+                string sec = two.Pop();
+                string fir = two.Pop();
+                double sec_i = stod(sec);
+                double fir_i = stod(fir);
+                double res = fir_i + sec_i;
+                two.Push(to_string(res));
+            }
+            if (Rev_exp[i] == '-')
+            {
+                string sec = two.Pop();
+                string fir = two.Pop();
+                double sec_i = stod(sec);
+                double fir_i = stod(fir);
+                double res = fir_i - sec_i;
+                two.Push(to_string(res));
+            }
+            
+        }
+        double result = stod(two.Back_el());
+        return result;
+
+    }
+};
+int main()
+{
+    Reverse test;
+    test.exp = "15*25-(-56)*(30-4)+abs((12+(25-60)))+(-12)";
+    test.Conversion();
+    cout << test.Rev_exp;
+    double res = test.Calculate();
+    cout << endl << res;
+    //double res = schet(Rev_exp);
+     //(5+7*(15-24))/6-4
+   
+    //Доразобрать обратную польскую запись, чтобы она была корректной с обновленным стеком (string type)
+    //Написать метод double Calculate(string reversePolandKurva);
+    return 0;
+
+}
